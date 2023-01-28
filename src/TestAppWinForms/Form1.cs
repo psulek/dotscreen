@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using static ScaleHQ.DotScreen.ScreenInformation;
 
 namespace TestAppWinForms
 {
@@ -11,18 +11,26 @@ namespace TestAppWinForms
         {
             InitializeComponent();
 
+            foreach (Screen screen in Screen.AllScreens)
+            {
+                var screenBitsPerPixel = screen.BitsPerPixel;
+                string deviceName = screen.DeviceName;
+                Rectangle bounds = screen.Bounds;
+                Rectangle workingArea = screen.WorkingArea;
+            }
+
             RefreshData();
         }
 
         private void RefreshData()
         {
-            var screens = AllScreens.ToArray();
+            var screens = ScaleHQ.DotScreen.Screen.AllScreens.ToArray();
             StringBuilder sb = new StringBuilder($"This system has {screens.Length} screen(s).\n");
 
-            sb.AppendLine($"MultiMonitorSupport: {MultiMonitorSupport}");
-            sb.AppendLine($"IsProcessDPIAware: {IsProcessDPIAware}");
-            sb.AppendLine($"SystemVirtualScreen: {SystemVirtualScreen}");
-            sb.AppendLine($"SystemVirtualScreenScaled: {SystemVirtualScreenScaled}");
+            sb.AppendLine($"MultiMonitorSupport: {ScaleHQ.DotScreen.Screen.MultiMonitorSupport}");
+            sb.AppendLine($"IsProcessDPIAware: {ScaleHQ.DotScreen.Screen.IsProcessDPIAware}");
+            sb.AppendLine($"SystemVirtualScreen: {ScaleHQ.DotScreen.Screen.SystemVirtualScreen}");
+            sb.AppendLine($"SystemVirtualScreenScaled: {ScaleHQ.DotScreen.Screen.SystemVirtualScreenScaled}");
             sb.AppendLine();
 
             foreach (var screen in screens)

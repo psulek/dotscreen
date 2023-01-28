@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Windows;
-using ScaleHQ.DotScreen;
 // ReSharper disable UnusedMember.Global
 
 namespace TestAppWpf
@@ -15,7 +14,7 @@ namespace TestAppWpf
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            var screens = ScreenInformation.AllScreens.ToArray();
+            var screens = ScaleHQ.DotScreen.Screen.AllScreens.ToArray();
             StringBuilder sb = new($"This system has {screens.Length} screen(s).\n");
 
             foreach (var screen in screens)

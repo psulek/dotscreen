@@ -32,13 +32,15 @@ namespace ScaleHQ.DotScreen
         /// </summary>
         private readonly IntPtr _monitorHandle;
 
+        private readonly int _bitDepth;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Screen"/> class.
         /// </summary>
         /// <param name="monitor">The monitor.</param>
         private Screen(IntPtr monitor)
             : this(monitor, IntPtr.Zero)
-        {}
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Screen"/> class.
@@ -47,6 +49,8 @@ namespace ScaleHQ.DotScreen
         /// <param name="hdc">The hdc.</param>
         private Screen(IntPtr monitor, IntPtr hdc)
         {
+            IntPtr screenDC = hdc;
+
             if (NativeMethods.IsProcessDPIAware())
             {
                 uint dpiX;
@@ -99,7 +103,7 @@ namespace ScaleHQ.DotScreen
                 var info = new NativeMethods.MONITORINFOEX();
 
                 NativeMethods.GetMonitorInfo(new HandleRef(null, monitor), info);
-                
+
                 Bounds = new Rectangle(
                     info.rcMonitor.left,
                     info.rcMonitor.top,
@@ -107,52 +111,26 @@ namespace ScaleHQ.DotScreen
                     info.rcMonitor.bottom - info.rcMonitor.top);
                 Primary = (info.dwFlags & MonitorInfoPrimary) != 0;
                 DeviceName = new string(info.szDevice).TrimEnd((char)0);
+
+                if (hdc.Equals(IntPtr.Zero)) {
+                    screenDC = NativeMethods.CreateDC(DeviceName, null, null, NativeMethods.NullHandleRef);
+
+                    _bitDepth = NativeMethods.GetDeviceCaps(new HandleRef(null, screenDC), NativeMethods.DeviceCap.BITSPIXEL);
+                    _bitDepth *= NativeMethods.GetDeviceCaps(new HandleRef(null, screenDC), NativeMethods.DeviceCap.PLANES);
+                }
+            }
+
+            if (!hdc.Equals(screenDC)) {
+                NativeMethods.DeleteDC(new HandleRef(null, screenDC));
             }
 
             _monitorHandle = monitor;
         }
 
-        internal static bool MultiMonitorSupport => NativeMethods.GetSystemMetrics(NativeMethods.SystemMetric.SM_CMONITORS) != 0;
-
-        internal static bool IsProcessDPIAware => NativeMethods.IsProcessDPIAware();
-
-        public bool IsSameHandle(IntPtr otherMonitorHandle) => _monitorHandle.Equals(otherMonitorHandle);
-
         /// <summary>
-        /// Gets an array of all displays on the system.
+        /// Gets Bits per Pixel value.
         /// </summary>
-        /// <returns>An enumerable of type Screen, containing all displays on the system.</returns>
-        internal static IEnumerable<Screen> AllScreens
-        {
-            get
-            {
-                if (MultiMonitorSupport)
-                {
-                    var closure = new MonitorEnumCallback();
-                    var proc = new NativeMethods.MonitorEnumProc(closure.Callback);
-                    NativeMethods.EnumDisplayMonitors(NativeMethods.NullHandleRef, null, proc, IntPtr.Zero);
-                    if (closure.Screens.Count > 0)
-                    {
-                        return closure.Screens.Cast<Screen>();
-                    }
-                }
-        
-                return new[] { new Screen(PrimaryMonitor) };
-            }
-        }
-
-        /// <summary>
-        /// Gets the primary display.
-        /// </summary>
-        /// <returns>The primary display.</returns>
-        internal static Screen PrimaryScreen
-        {
-            get
-            {
-                var screen = MultiMonitorSupport ? AllScreens.FirstOrDefault(t => t.Primary) : new Screen(PrimaryMonitor);
-                return screen ?? new Screen(PrimaryMonitor);
-            }
-        }
+        public int BitsPerPixel => _bitDepth;
 
         /// <summary>
         /// Gets the bounds of the display in pixels.
@@ -239,40 +217,6 @@ namespace ScaleHQ.DotScreen
                     WorkingArea.Height / ScaleFactor);
 
         /// <summary>
-        /// Retrieves a Screen for the display that contains the largest portion of the specified control.
-        /// </summary>
-        /// <param name="windowHandle">The window handle for which to retrieve the Screen.</param>
-        /// <returns>
-        /// A Screen for the display that contains the largest region of the object. In multiple display environments
-        /// where no display contains any portion of the specified window, the display closest to the object is returned.
-        /// </returns>
-        public static Screen FromHandle(IntPtr windowHandle)
-        {
-            return MultiMonitorSupport
-                       ? new Screen(NativeMethods.MonitorFromWindow(new HandleRef(null, windowHandle), 2))
-                       : new Screen(PrimaryMonitor);
-        }
-
-        /// <summary>
-        /// Retrieves a Screen for the display that contains the specified point in pixels.
-        /// </summary>
-        /// <param name="point">A <see cref="T:System.Windows.Point" /> that specifies the location for which to retrieve a Screen.</param>
-        /// <returns>
-        /// A Screen for the display that contains the point in pixels. In multiple display environments where no display contains
-        /// the point, the display closest to the specified point is returned.
-        /// </returns>
-        public static Screen FromPoint(Point point)
-        {
-            if (MultiMonitorSupport)
-            {
-                var pt = new NativeMethods.POINTSTRUCT(point.X, point.Y);
-                return new Screen(NativeMethods.MonitorFromPoint(pt, NativeMethods.MonitorDefault.MONITOR_DEFAULTTONEAREST));
-            }
-
-            return new Screen(PrimaryMonitor);
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the specified object is equal to this Screen.
         /// </summary>
         /// <param name="obj">The object to compare to this Screen.</param>
@@ -303,6 +247,147 @@ namespace ScaleHQ.DotScreen
         {
             return
                 $"{DeviceName} , bounds: {Bounds}, workArea: {WorkingArea}, primary: {(Primary ? "yes" : "no")}, scaleFactor: {ScaleFactor}";
+        }
+
+        /// <summary>
+        /// Determine whenever system has running more than one visible monitor.
+        /// </summary>
+        public static bool MultiMonitorSupport => NativeMethods.GetSystemMetrics(NativeMethods.SystemMetric.SM_CMONITORS) != 0;
+
+        /// <summary>
+        /// Gets flag whenever current process is DPI aware or not.
+        /// </summary>
+        public static bool IsProcessDPIAware => NativeMethods.IsProcessDPIAware();
+
+        public bool IsSameHandle(IntPtr otherMonitorHandle) => _monitorHandle.Equals(otherMonitorHandle);
+
+        /// <summary>
+        /// Gets an array of all displays on the system.
+        /// </summary>
+        /// <returns>An enumerable of type Screen, containing all displays on the system.</returns>
+        public static IEnumerable<Screen> AllScreens
+        {
+            get
+            {
+                if (MultiMonitorSupport)
+                {
+                    var closure = new MonitorEnumCallback();
+                    var proc = new NativeMethods.MonitorEnumProc(closure.Callback);
+                    NativeMethods.EnumDisplayMonitors(NativeMethods.NullHandleRef, null, proc, IntPtr.Zero);
+                    if (closure.Screens.Count > 0)
+                    {
+                        return closure.Screens.Cast<Screen>();
+                    }
+                }
+
+                return new[] { new Screen(PrimaryMonitor) };
+            }
+        }
+
+        /// <summary>
+        /// Gets the bounds of the system virtual screen in pixels (without applying scale factor).
+        /// </summary>
+        /// <value>
+        ///     A <see cref="T:System.Windows.RectangleD" /> that specifies the bounding rectangle of the entire virtual screen in pixels.
+        /// </value>
+        public static Rectangle SystemVirtualScreen
+        {
+            get
+            {
+                var size = new Size(
+                    NativeMethods.GetSystemMetrics(NativeMethods.SystemMetric.SM_CXVIRTUALSCREEN),
+                    NativeMethods.GetSystemMetrics(NativeMethods.SystemMetric.SM_CYVIRTUALSCREEN));
+                var location = new Point(
+                    NativeMethods.GetSystemMetrics(NativeMethods.SystemMetric.SM_XVIRTUALSCREEN),
+                    NativeMethods.GetSystemMetrics(NativeMethods.SystemMetric.SM_YVIRTUALSCREEN));
+                return new Rectangle(location.X, location.Y, size.Width, size.Height);
+            }
+        }
+
+        /// <summary>
+        /// Gets the bounds of the system virtual screen in pixels scaled by all screens <see cref="Screen.ScaleFactor"/>.
+        /// </summary>
+        /// <value>
+        ///     A <see cref="T:System.Windows.RectangleD" /> that specifies the bounding rectangle of the entire virtual screen in pixels
+        ///     scaled by all screens <see cref="Screen.ScaleFactor"/>.
+        /// </value>
+        /// <remarks>
+        /// If <see cref="IsProcessDPIAware"/> is <c>false</c> or then result is same as <see cref="SystemVirtualScreen"/>.
+        /// </remarks>
+        public static RectangleD SystemVirtualScreenScaled
+        {
+            get
+            {
+                if (!IsProcessDPIAware)
+                {
+                    return new RectangleD(SystemVirtualScreen);
+                }
+
+                var values = AllScreens.Aggregate(
+                    new
+                    {
+                        xMin = 0.0,
+                        yMin = 0.0,
+                        xMax = 0.0,
+                        yMax = 0.0
+                    },
+                    (accumulator, s) => new
+                    {
+                        xMin = Math.Min(s.BoundsScaled.X, accumulator.xMin),
+                        yMin = Math.Min(s.BoundsScaled.Y, accumulator.yMin),
+                        xMax = Math.Max(s.BoundsScaled.Right, accumulator.xMax),
+                        yMax = Math.Max(s.BoundsScaled.Bottom, accumulator.yMax)
+                    });
+
+                return new RectangleD(values.xMin, values.yMin, values.xMax - values.xMin, values.yMax - values.yMin);
+            }
+        }
+
+        /// <summary>
+        /// Gets the primary display.
+        /// </summary>
+        /// <returns>The primary display.</returns>
+        public static Screen PrimaryScreen
+        {
+            get
+            {
+                var screen = MultiMonitorSupport ? AllScreens.FirstOrDefault(t => t.Primary) : new Screen(PrimaryMonitor);
+                return screen ?? new Screen(PrimaryMonitor);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a Screen for the display that contains the largest portion of the specified control.
+        /// </summary>
+        /// <param name="windowHandle">The window handle for which to retrieve the Screen.</param>
+        /// <returns>
+        /// A Screen for the display that contains the largest region of the object. In multiple display environments
+        /// where no display contains any portion of the specified window, the display closest to the object is returned.
+        /// </returns>
+        public static Screen FromHandle(IntPtr windowHandle)
+        {
+            return MultiMonitorSupport
+                ? new Screen(NativeMethods.MonitorFromWindow(new HandleRef(null, windowHandle), 2))
+                : new Screen(PrimaryMonitor);
+        }
+
+        /// <summary>
+        /// Retrieves a Screen for the display that contains the specified point in pixels.
+        /// </summary>
+        /// <param name="point">A <see cref="T:System.Windows.Point" /> that specifies the location for which to retrieve a Screen.</param>
+        /// <returns>
+        /// A Screen for the display that contains the point in pixels. In multiple display environments where no display contains
+        /// the point, the display closest to the specified point is returned.
+        /// </returns>
+        public static Screen FromPoint(Point point)
+        {
+            if (MultiMonitorSupport)
+            {
+                var pt = new NativeMethods.POINTSTRUCT(point.X, point.Y);
+                return new Screen(NativeMethods.MonitorFromPoint(pt, NativeMethods.MonitorDefault.MONITOR_DEFAULTTONEAREST));
+            }
+
+            return new Screen(PrimaryMonitor);
         }
 
         /// <summary>

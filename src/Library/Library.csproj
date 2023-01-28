@@ -10,16 +10,22 @@
 		<Authors>Fork from Peter Šulek, original author Michael Denny, Contributors (see GitHub repo)</Authors>
 		<PackageId>ScaleHQ.DotScreen</PackageId>
 		<PackageProjectUrl>https://github.com/psulek/dotscreen</PackageProjectUrl>
-		<Description>Porting of WPF Screen helper (WpfScreenHelper). It avoids dependencies on Windows Forms and WPF libraries.
-	    Using this library you dont need to set 'UseWPF' nor 'UseWindowsForms' which means console applications wpf/winforms dependency free.</Description>
+		<Description>
+			Library to get information about system screens in applications without dependency on WinForms or WPF.
+			Primary usage of this library is for console/library types of projects as they dont have direct dependency on Winforms nor WPF.
+			Using this library you dont need to set 'UseWPF' nor 'UseWindowsForms' which means console applications are wpf/winforms dependency free.
+		</Description>
 		<Copyright>Copyright Peter Šulek (fork) and Michael Denny 2019 (original author)</Copyright>
-		<PackageTags>Screen Monitor Display Helper WPF Console WinForms</PackageTags>
 		<RepositoryUrl>https://github.com/psulek/dotscreen</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.0</Version>
+		<Deterministic>false</Deterministic>
+		<Version>1.0.0-rc.2</Version>
 		<LangVersion>8.0</LangVersion>
 		<CheckEolTargetFramework>false</CheckEolTargetFramework>
 		<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>screen;monitor;display;screens;wpf;winforms;console;win32api</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
@@ -29,15 +35,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-	  <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
+		<PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
+		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
 	</ItemGroup>
 
-
+	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\"/>
+	</ItemGroup>
 
 	<Target Name="CopyPackage" AfterTargets="Pack">
-	  <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\..\package\" />
-	  <Message Importance="high" Text="Successfully copied package to the root package folder." />
+		<Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\..\package\" />
+		<Message Importance="high" Text="Successfully copied package to the root package folder." />
 	</Target>
 
 </Project>

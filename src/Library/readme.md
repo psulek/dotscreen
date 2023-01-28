@@ -1,4 +1,4 @@
-# DotScreen
+﻿# DotScreen
 **DotScreen** is library to get information about system screens in applications without dependency on WinForms or WPF.
 
 > Primary console/library projects will benefit using this library as they dont want direct dependency on Winforms nor WPF
@@ -30,7 +30,10 @@ In **DotScreen** there are some additions to `Screen` class:
 
 > There is not need to add \<UseWPF> or \<UseWindowsForms> into project (csproj) file when using DotScreen
 
-### Remark
+#### Source Code
+[Github](https://github.com/psulek/dotscreen) repository.
+
+#### Remark
 This library is port of [WpfScreenHelper](https://www.nuget.org/packages/WpfScreenHelper). 
 It avoids dependencies on Windows Forms and WPF libraries.
 
