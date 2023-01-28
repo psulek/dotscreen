@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net5.0;</TargetFrameworks>
+		<!-- <TargetFrameworks>netstandard2.0</TargetFrameworks> -->
+		<!-- <TargetFrameworks>net40;</TargetFrameworks> -->
+		<!-- <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks> -->
+		<!-- <IsTrimmable>true</IsTrimmable> -->
+		<!-- <GeneratePackageOnBuild>true</GeneratePackageOnBuild> -->
+		<AssemblyName>ScaleHQ.DotScreen</AssemblyName>
+		<RootNamespace>ScaleHQ.DotScreen</RootNamespace>
+		<Title>Screen Helper for .NET application (console, wpf/winforms)</Title>
+		<Authors>Fork from Peter Šulek, original author Michael Denny, Contributors (see GitHub repo)</Authors>
+		<PackageId>ScaleHQ.DotScreen</PackageId>
+		<PackageProjectUrl></PackageProjectUrl>
+		<Description>Porting of WPF Screen helper (WpfScreenHelper). It avoids dependencies on Windows Forms and WPF libraries.
+	    Using this library you dont need to set 'UseWPF' nor 'UseWindowsForms' that means also console applications are supported.</Description>
+		<Copyright>Copyright Peter Šulek (fork) and Michael Denny 2019 (original author)</Copyright>
+		<PackageTags>Screen Monitor Display Helper</PackageTags>
+		<RepositoryUrl></RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Version>1.0.0</Version>
+		<LangVersion>8.0</LangVersion>
+		<CheckEolTargetFramework>false</CheckEolTargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+	  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0' ">
+		<AssemblyAttribute Include="System.Runtime.Versioning.SupportedOSPlatform">
+			<_Parameter1>windows</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+
+
+
+	<!-- <Target Name="CopyPackage" AfterTargets="Pack"> -->
+	<!--   <Copy SourceFiles="$(OutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="..\..\package\" /> -->
+	<!--   <Message Importance="high" Text="Successfully copied package to the root package folder." /> -->
+	<!-- </Target> -->
+
+</Project>

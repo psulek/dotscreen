@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<SelfContained>false</SelfContained>
+		<PublishTrimmed>false</PublishTrimmed>
+		<!-- <TrimMode>full</TrimMode> -->
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishSingleFile>true</PublishSingleFile>
+		<DebugType>embedded</DebugType>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="PInvoke.SHCore" Version="0.7.124" />
+	  <PackageReference Include="PInvoke.User32" Version="0.7.124" />
+	  <PackageReference Include="Vanara.PInvoke.SHCore" Version="3.4.12" />
+	  <PackageReference Include="Vanara.PInvoke.User32" Version="3.4.12" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Library\Library.csproj" />
+		<!-- <TrimmerRootAssembly Include="ScaleHQ.DotScreen" Visible="false" /> -->
+		<TrimmableAssembly Include="ScaleHQ.DotScreen" Visible="false" />
+	</ItemGroup>
+
+</Project>
