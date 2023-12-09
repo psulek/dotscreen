@@ -3,6 +3,15 @@
 
 > Primary console/library projects will benefit using this library as they dont want direct dependency on Winforms nor WPF
 
+### Install
+Install nuget package - [ScaleHQ.DotScreen](https://www.nuget.org/packages/ScaleHQ.DotScreen/)
+
+or via *dotnet CLI*:
+```bash
+dotnet add package ScaleHQ.DotScreen
+```
+
+### API
 Class `ScaleHQ.DotScreen.Screen.Screen` has almost all properties matching `System.Windows.Forms.Screen`.
 
 There is only difference in namespace, instead of `System.Windows.Forms` there is `ScaleHQ.DotScreen.Screen`.
