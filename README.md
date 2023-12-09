@@ -8,7 +8,7 @@ Install nuget package - [ScaleHQ.DotScreen](https://www.nuget.org/packages/Scale
 
 or via *dotnet CLI*:
 ```bash
-dotnet add package ScaleHQ.DotScreen
+dotnet add package ScaleHQ.DotScreen --prerelease
 ```
 
 ### API
